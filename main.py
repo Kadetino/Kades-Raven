@@ -21,10 +21,11 @@ class RavenBot(commands.Bot):
 
         # Intents
         intents = discord.Intents.default()
-        intents.message_content = True
-        intents.members = True
+        intents.message_content = True  # message_logging.py
+        intents.members = True  # member_logging.py
         intents.emojis_and_stickers = True
-        intents.invites = True
+        intents.invites = True  # invite_logging.py
+        intents.integrations = True  # integration_logging.py
 
         # Constructor
         super().__init__(command_prefix=prefix,
@@ -57,13 +58,6 @@ class RavenBot(commands.Bot):
         # Cogs
         for ext in self.initial_extensions:
             await self.load_extension(ext)
-
-        # Slash commands - Goose refuge
-        self.tree.copy_global_to(guild=discord.Object(id=950688544433778689))
-        await self.tree.sync(guild=discord.Object(id=950688544433778689))
-        # # Slash commands
-        # self.tree.copy_global_to(guild=discord.Object(id=664124313997148170))
-        # await self.tree.sync(guild=discord.Object(id=664124313997148170))
 
     async def close(self):
         await super().close()
