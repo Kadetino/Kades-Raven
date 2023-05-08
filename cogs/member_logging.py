@@ -57,9 +57,10 @@ class MemberLoggingCog(commands.Cog):
             if role.name == "@everyone":
                 continue
             roles.append(f"<@&{role.id}>")
-        embed.add_field(name=f"Roles:",
-                        value=f"{','.join(roles)}",
-                        inline=True)
+        if roles:
+            embed.add_field(name=f"Roles:",
+                            value=f"{','.join(roles)}",
+                            inline=True)
         # Send Webhook
         sql_connection = sl.connect('Raven.db')
         try:
@@ -90,7 +91,6 @@ class MemberLoggingCog(commands.Cog):
         except sl.OperationalError:
             return sql_connection.close()
         sql_connection.close()
-
 
         # Nickname was changed
         if before.nick != after.nick:
