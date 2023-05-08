@@ -23,7 +23,7 @@ class RavenBot(commands.Bot):
         intents = discord.Intents.default()
         intents.message_content = True  # message_logging.py
         intents.members = True  # member_logging.py
-        intents.emojis_and_stickers = True
+        intents.emojis_and_stickers = True  # emoji_logging.py
         intents.invites = True  # invite_logging.py
         intents.integrations = True  # integration_logging.py
 
@@ -46,6 +46,7 @@ class RavenBot(commands.Bot):
             "cogs.member_logging",
             "cogs.invite_logging",
             "cogs.integration_logging",
+            "cogs.emoji_logging",
         ]
 
         @self.tree.error
