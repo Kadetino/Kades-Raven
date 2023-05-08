@@ -21,12 +21,17 @@ class MessageLoggingCog(commands.Cog):
         # General info
         embed = discord.Embed(description=f"[Message]({before.jump_url}) was edited",
                               colour=discord.Colour.yellow(), )
+
+        # Remove ` symbols
+        a_msg_content = after.content.replace("`", "'")
+        b_msg_content = before.content.replace("`", "'")
+
         # Message contents
         embed.add_field(name=f"**Old message:**",
-                        value=f"```{before.content}```",
+                        value=f"```{b_msg_content}```",
                         inline=False)
         embed.add_field(name=f"**New message:**",
-                        value=f"```{after.content}```",
+                        value=f"```{a_msg_content}```",
                         inline=False)
         # Author info
         embed.set_author(name=before.author, icon_url=before.author.display_avatar.url)
@@ -65,9 +70,13 @@ class MessageLoggingCog(commands.Cog):
         # General info
         embed = discord.Embed(description=f"Message was deleted",
                               colour=discord.Colour.red(), )
+
+        # Remove ` symbols
+        msg_content = message.content.replace("`", "'")
+
         # Message contents
         embed.add_field(name=f"**Deleted message:**",
-                        value=f"```{message.content}```",
+                        value=f"```{msg_content}```",
                         inline=False)
         # Author info
         embed.set_author(name=message.author, icon_url=message.author.display_avatar.url)
