@@ -9,7 +9,7 @@ class ThreadLoggingCog(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener('on_thread_join')
-    async def thread_created(self, thread):
+    async def thread_joined(self, thread: discord.Thread):
         # General info
         embed = discord.Embed(title=f"New thread was joined",
                               colour=discord.Colour.green(),
@@ -35,7 +35,7 @@ class ThreadLoggingCog(commands.Cog):
                                avatar_url=self.bot.user.display_avatar.url)
 
     @commands.Cog.listener('on_thread_create')
-    async def thread_created(self, thread):
+    async def thread_created(self, thread: discord.Thread):
         # General info
         embed = discord.Embed(title=f"New thread was created",
                               colour=discord.Colour.dark_green(),
@@ -61,7 +61,7 @@ class ThreadLoggingCog(commands.Cog):
                                avatar_url=self.bot.user.display_avatar.url)
 
     @commands.Cog.listener('on_thread_remove')
-    async def thread_removed(self, thread):
+    async def thread_removed(self, thread: discord.Thread):
         # General info
         embed = discord.Embed(title=f"Thread was removed",
                               colour=discord.Colour.orange(),
@@ -87,7 +87,7 @@ class ThreadLoggingCog(commands.Cog):
                                avatar_url=self.bot.user.display_avatar.url)
 
     @commands.Cog.listener('on_thread_delete')
-    async def thread_deleted(self, thread):
+    async def thread_deleted(self, thread: discord.Thread):
         # General info
         embed = discord.Embed(title=f"Thread was deleted",
                               colour=discord.Colour.dark_red(),
