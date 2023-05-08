@@ -43,7 +43,8 @@ class RavenBot(commands.Bot):
             "cogs.channel_logging",
             "cogs.thread_logging",
             "cogs.member_logging",
-            "cogs.invite_logging"
+            "cogs.invite_logging",
+            "cogs.integration_logging",
         ]
 
         @self.tree.error
