@@ -206,67 +206,67 @@ class MemberLoggingCog(commands.Cog):
 
         return
 
-    @commands.Cog.listener('on_user_update')
-    async def user_update(self, before: discord.Member, after: discord.Member):
-        # Get Webhook
-        sql_connection = sl.connect('Raven.db')
-        try:
-            hook_url = \
-                sql_connection.execute(
-                    f"SELECT WEBHOOK_URL FROM MEMBERS WHERE guild_id = {after.guild.id}").fetchone()[0]
-        except TypeError:
-            return sql_connection.close()
-        except sl.OperationalError:
-            return sql_connection.close()
-        sql_connection.close()
-
-        # Nickname was changed
-        if before.name != after.name:
-            # General info
-            embed = discord.Embed(title=f"Name changed",
-                                  colour=discord.Colour.dark_gray())
-            embed.set_author(name=after, icon_url=after.display_avatar.url)
-            embed.add_field(name=f"**Old:**",
-                            value=f"{before.name}",
-                            inline=True)
-            embed.add_field(name=f"**New:**",
-                            value=f"{after.name}",
-                            inline=True)
-            # User info
-            embed.add_field(name=f"**User affected:**",
-                            value=f"<@{after.id}>",
-                            inline=False)
-            embed.set_footer(text=f"Member Id: {after.id}")
-
-            # Send Webhook
-            async with aiohttp.ClientSession() as session:
-                webhook = discord.Webhook.from_url(url=hook_url, session=session)
-                await webhook.send(embed=embed, username='Raven - Name changed',
-                                   avatar_url=self.bot.user.display_avatar.url)
-        if before.discriminator != after.discriminator:
-            # General info
-            embed = discord.Embed(title=f"Discriminator changed",
-                                  colour=discord.Colour.dark_gray())
-            embed.set_author(name=after, icon_url=after.display_avatar.url)
-            embed.add_field(name=f"**Old:**",
-                            value=f"{before.discriminator}",
-                            inline=True)
-            embed.add_field(name=f"**New:**",
-                            value=f"{after.discriminator}",
-                            inline=True)
-            # User info
-            embed.add_field(name=f"**User affected:**",
-                            value=f"<@{after.id}>",
-                            inline=False)
-            embed.set_footer(text=f"Member Id: {after.id}")
-
-            # Send Webhook
-            async with aiohttp.ClientSession() as session:
-                webhook = discord.Webhook.from_url(url=hook_url, session=session)
-                await webhook.send(embed=embed, username='Raven - Discriminator changed',
-                                   avatar_url=self.bot.user.display_avatar.url)
-
-        return
+    # @commands.Cog.listener('on_user_update')
+    # async def user_update(self, before: discord.Member, after: discord.Member):
+    #     # Get Webhook
+    #     sql_connection = sl.connect('Raven.db')
+    #     try:
+    #         hook_url = \
+    #             sql_connection.execute(
+    #                 f"SELECT WEBHOOK_URL FROM MEMBERS WHERE guild_id = {after.guild.id}").fetchone()[0]
+    #     except TypeError:
+    #         return sql_connection.close()
+    #     except sl.OperationalError:
+    #         return sql_connection.close()
+    #     sql_connection.close()
+    #
+    #     # Nickname was changed
+    #     if before.name != after.name:
+    #         # General info
+    #         embed = discord.Embed(title=f"Name changed",
+    #                               colour=discord.Colour.dark_gray())
+    #         embed.set_author(name=after, icon_url=after.display_avatar.url)
+    #         embed.add_field(name=f"**Old:**",
+    #                         value=f"{before.name}",
+    #                         inline=True)
+    #         embed.add_field(name=f"**New:**",
+    #                         value=f"{after.name}",
+    #                         inline=True)
+    #         # User info
+    #         embed.add_field(name=f"**User affected:**",
+    #                         value=f"<@{after.id}>",
+    #                         inline=False)
+    #         embed.set_footer(text=f"Member Id: {after.id}")
+    #
+    #         # Send Webhook
+    #         async with aiohttp.ClientSession() as session:
+    #             webhook = discord.Webhook.from_url(url=hook_url, session=session)
+    #             await webhook.send(embed=embed, username='Raven - Name changed',
+    #                                avatar_url=self.bot.user.display_avatar.url)
+    #     if before.discriminator != after.discriminator:
+    #         # General info
+    #         embed = discord.Embed(title=f"Discriminator changed",
+    #                               colour=discord.Colour.dark_gray())
+    #         embed.set_author(name=after, icon_url=after.display_avatar.url)
+    #         embed.add_field(name=f"**Old:**",
+    #                         value=f"{before.discriminator}",
+    #                         inline=True)
+    #         embed.add_field(name=f"**New:**",
+    #                         value=f"{after.discriminator}",
+    #                         inline=True)
+    #         # User info
+    #         embed.add_field(name=f"**User affected:**",
+    #                         value=f"<@{after.id}>",
+    #                         inline=False)
+    #         embed.set_footer(text=f"Member Id: {after.id}")
+    #
+    #         # Send Webhook
+    #         async with aiohttp.ClientSession() as session:
+    #             webhook = discord.Webhook.from_url(url=hook_url, session=session)
+    #             await webhook.send(embed=embed, username='Raven - Discriminator changed',
+    #                                avatar_url=self.bot.user.display_avatar.url)
+    #
+    #     return
 
     @commands.Cog.listener('on_member_ban')
     async def member_banned(self, guild: discord.Guild, user: discord.Member):
