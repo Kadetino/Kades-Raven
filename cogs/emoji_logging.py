@@ -8,7 +8,6 @@ class EmojiNStickersLoggingCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # TODO change in description or unicode emoji or name
     @commands.Cog.listener('on_guild_stickers_update')
     async def stickers_updated(self, guild: discord.Guild, before, after):
         # Get Webhook
@@ -70,9 +69,35 @@ class EmojiNStickersLoggingCog(commands.Cog):
                                     inline=True)
                 await webhook.send(embed=embed, username='Raven - Stickers updated',
                                    avatar_url=self.bot.user.display_avatar.url)
+
+            # Checking for namechanges
+            for after_sticker in after:
+                for before_sticker in before:
+                    if before_sticker.id == after_sticker.id and after_sticker.name != before_sticker.name:
+                        embed = discord.Embed(title=f"Sticker renamed",
+                                              colour=discord.Colour.yellow(),)
+                        embed.set_footer(text=f"Guild Id: {guild.id}")
+                        embed.set_author(name=f"{before_sticker.name} -> {after_sticker.name}",
+                                         icon_url=after_sticker.url)
+                        temp = before_sticker.name.replace('`', "'")
+                        embed.add_field(name=f"**Old name:**",
+                                        value=f"```{temp}```",
+                                        inline=False)
+                        temp = after_sticker.name.replace('`', "'")
+                        embed.add_field(name=f"**New name:**",
+                                        value=f"```{temp}```",
+                                        inline=False)
+                        embed.add_field(name=f"**Format:**",
+                                        value=f"{str(after_sticker.format)[str(after_sticker.format).find('.')::]}",
+                                        inline=True)
+                        embed.add_field(name=f"**Unicode emoji:**",
+                                        value=f":{after_sticker.emoji}:",
+                                        inline=True)
+                        await webhook.send(embed=embed, username='Raven - Sticker updated',
+                                           avatar_url=self.bot.user.display_avatar.url)
+
         return
 
-    # TODO emoji namechange
     @commands.Cog.listener('on_guild_emojis_update')
     async def emojis_updated(self, guild: discord.Guild, before, after):
         # Get Webhook
@@ -126,6 +151,30 @@ class EmojiNStickersLoggingCog(commands.Cog):
                                 inline=True)
                 await webhook.send(embed=embed, username='Raven - Emoji updated',
                                    avatar_url=self.bot.user.display_avatar.url)
+
+            # Checking for namechanges
+            for after_emoji in after:
+                for before_emoji in before:
+                    if before_emoji.id == after_emoji.id and after_emoji.name != before_emoji.name:
+                        embed = discord.Embed(title=f"Emoji renamed",
+                                              colour=discord.Colour.yellow(),
+                                              description=f"<:{after_emoji.name}:{after_emoji.id}>")
+                        embed.set_footer(text=f"Guild Id: {guild.id}")
+                        embed.set_author(name=f"{before_emoji.name} -> {after_emoji.name}", icon_url=after_emoji.url)
+                        embed.add_field(name=f"**Old name:**",
+                                        value=f"```{before_emoji.name}```",
+                                        inline=False)
+                        embed.add_field(name=f"**New name:**",
+                                        value=f"```{after_emoji.name}```",
+                                        inline=False)
+                        embed.add_field(name=f"**Animated:**",
+                                        value=f"{after_emoji.animated}",
+                                        inline=True)
+                        embed.add_field(name=f"**Id:**",
+                                        value=f"{after_emoji.id}",
+                                        inline=True)
+                        await webhook.send(embed=embed, username='Raven - Emoji updated',
+                                           avatar_url=self.bot.user.display_avatar.url)
         return
 
 
