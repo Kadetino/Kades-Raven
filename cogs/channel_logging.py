@@ -1,4 +1,3 @@
-import aiohttp  # Session for webhook
 import discord  # Discord API wrapper
 from discord.ext import commands  # Discord BOT
 import sqlite3 as sl
@@ -29,10 +28,9 @@ class ChannelLoggingCog(commands.Cog):
             return sql_connection.close()
         sql_connection.close()
 
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url(url=hook_url, session=session)
-            await webhook.send(embed=embed, username='Raven - Channel created',
-                               avatar_url=self.bot.user.display_avatar.url)
+        webhook = discord.Webhook.from_url(url=hook_url, session=self.bot.session)
+        await webhook.send(embed=embed, username='Raven - Channel created',
+                           avatar_url=self.bot.user.display_avatar.url)
 
     @commands.Cog.listener('on_guild_channel_delete')
     async def channel_deleted(self, channel):
@@ -55,10 +53,9 @@ class ChannelLoggingCog(commands.Cog):
             return sql_connection.close()
         sql_connection.close()
 
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url(url=hook_url, session=session)
-            await webhook.send(embed=embed, username='Raven - Channel deleted',
-                               avatar_url=self.bot.user.display_avatar.url)
+        webhook = discord.Webhook.from_url(url=hook_url, session=self.bot.session)
+        await webhook.send(embed=embed, username='Raven - Channel deleted',
+                           avatar_url=self.bot.user.display_avatar.url)
 
     @commands.Cog.listener('on_guild_channel_update')
     async def channel_updated(self, before, after):
@@ -66,11 +63,12 @@ class ChannelLoggingCog(commands.Cog):
             return
         # General info
         elif before.position != after.position or before.category != after.category and before.name == after.name:
-            embed = discord.Embed(title=f"Channel was moved",
-                                  colour=discord.Colour.light_gray(),
-                                  description=f"**{before.name}** (<#{after.id}>) was moved.\n"
-                                              f"{before.category} -> {after.category}\n"
-                                              f"{before.position} -> {after.position}")
+            # embed = discord.Embed(title=f"Channel was moved",
+            #                       colour=discord.Colour.light_gray(),
+            #                       description=f"**{before.name}** (<#{after.id}>) was moved.\n"
+            #                                   f"{before.category} -> {after.category}\n"
+            #                                   f"{before.position} -> {after.position}")
+            return
         else:
             embed = discord.Embed(title=f"Channel was updated",
                                   colour=discord.Colour.yellow(),
@@ -91,10 +89,9 @@ class ChannelLoggingCog(commands.Cog):
         sql_connection.close()
 
 
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url(url=hook_url, session=session)
-            await webhook.send(embed=embed, username='Raven - Channel updated',
-                               avatar_url=self.bot.user.display_avatar.url)
+        webhook = discord.Webhook.from_url(url=hook_url, session=self.bot.session)
+        await webhook.send(embed=embed, username='Raven - Channel updated',
+                           avatar_url=self.bot.user.display_avatar.url)
 
 
 async def setup(bot):
