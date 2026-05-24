@@ -1,65 +1,107 @@
-import discord  # Discord API wrapper
+import discord
 from discord import app_commands
-from discord.ext import commands  # Discord BOT
+from discord.ext import commands
 import sqlite3 as sl
 
 
-class setupCog(commands.Cog):
+class SetupModal(discord.ui.Modal, title="Setup Logging"):
+    category_name = discord.ui.TextInput(
+        label="Category Name",
+        placeholder="Ravens-corner",
+        default="Ravens-corner",
+    )
+
+    channel_prefix = discord.ui.TextInput(
+        label="Channel Prefix",
+        placeholder="logs",
+        default="logs",
+    )
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
+        guild = interaction.guild
+        if guild is None:
+            return await interaction.followup.send("This command can only be used in a server.")
+
+        prefix = (self.channel_prefix.value or "").strip().lower().replace(" ", "-")
+        category_name = (self.category_name.value or "").strip() or "Ravens-corner"
+
+        try:
+            corner = await guild.create_category(name=category_name)
+            await corner.set_permissions(
+                guild.default_role,
+                read_messages=False,
+                send_messages=False,
+                connect=False,
+            )
+
+            async def make_channel(name: str) -> str:
+                ch = await corner.create_text_channel(name=f"{prefix}-{name}")
+                webhook = await ch.create_webhook(name="Raven-logging")
+                return webhook.url
+
+            channels_url = await make_channel("channels")
+            messages_url = await make_channel("messages")
+            roles_url = await make_channel("roles")
+            members_url = await make_channel("members")
+            guild_url = await make_channel("guild")
+
+            threads_channel = await corner.create_text_channel(name=f"{prefix}-threads")
+            threads_url = (await threads_channel.create_webhook(name="Raven-logging")).url
+
+            conn = sl.connect("Raven.db")
+            try:
+                conn.execute(
+                    "INSERT OR IGNORE INTO CHANNELS VALUES (?,?,?)",
+                    (guild.id, channels_url, 1),
+                )
+                conn.execute(
+                    "INSERT OR IGNORE INTO MESSAGES VALUES (?,?,?)",
+                    (guild.id, messages_url, 1),
+                )
+                conn.execute(
+                    "INSERT OR IGNORE INTO ROLES VALUES (?,?,?)",
+                    (guild.id, roles_url, 1),
+                )
+                conn.execute(
+                    "INSERT OR IGNORE INTO THREADS VALUES (?,?,?)",
+                    (guild.id, threads_url, 1),
+                )
+                conn.execute(
+                    "INSERT OR IGNORE INTO MEMBERS VALUES (?,?,?)",
+                    (guild.id, members_url, 1),
+                )
+                conn.execute(
+                    "INSERT OR IGNORE INTO GUILDS VALUES (?,?,?)",
+                    (guild.id, guild_url, 1),
+                )
+                conn.commit()
+            finally:
+                conn.close()
+
+        except discord.Forbidden:
+            return await interaction.followup.send(
+                "Missing permissions to create categories/channels/webhooks. "
+                "Grant Manage Channels + Manage Webhooks and try again."
+            )
+        except discord.HTTPException as e:
+            return await interaction.followup.send(f"Setup failed: {e}")
+        except sl.Error as e:
+            return await interaction.followup.send(f"Database error: {e}")
+
+        await interaction.followup.send("Logging setup complete.")
+
+
+class SetupCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # @app_commands.command(name="setup", description="Setup logging channels")
-    # async def setup_logging(self, ctx: discord.Interaction):
-    #     await create_category()
-    #     return await ctx.response.send_message("All done", ephemeral=True)
-    @commands.command()
-    @commands.is_owner()
-    async def setuplogging(self, ctx: commands.Context):
-        corner = await ctx.guild.create_category(name="Ravens-corner")
-        await corner.set_permissions(ctx.guild.default_role, read_messages=False, send_messages=False, connect=False)
-
-        channels = await corner.create_text_channel(name="logs-channels")
-        channels_url = (await channels.create_webhook(name="Raven-logging")).url
-
-        messages = await corner.create_text_channel(name="logs-messages")
-        messages_url = (await messages.create_webhook(name="Raven-logging")).url
-
-        roles = await corner.create_text_channel(name="logs-roles")
-        roles_url = (await roles.create_webhook(name="Raven-logging")).url
-
-        threads = channels  # await corner.create_text_channel(name="logs-threads")
-        threads_url = (await threads.create_webhook(name="Raven-logging")).url
-
-        members = await corner.create_text_channel(name="logs-members")
-        members_url = (await members.create_webhook(name="Raven-logging")).url
-
-        guild = await corner.create_text_channel(name="logs-guild")
-        guild_url = (await guild.create_webhook(name="Raven-logging")).url
-
-
-        sql_connection = sl.connect('Raven.db')
-        sql_connection.execute(
-            "INSERT OR IGNORE INTO CHANNELS (GUILD_ID, WEBHOOK_URL, IS_ACTIVE) VALUES (?,?,?)",
-            (int(ctx.guild.id), str(channels_url), 1))
-        sql_connection.execute(
-            "INSERT OR IGNORE INTO MESSAGES (GUILD_ID, WEBHOOK_URL, IS_ACTIVE) VALUES (?,?,?)",
-            (int(ctx.guild.id), str(messages_url), 1))
-        sql_connection.execute(
-            "INSERT OR IGNORE INTO ROLES (GUILD_ID, WEBHOOK_URL, IS_ACTIVE) VALUES (?,?,?)",
-            (int(ctx.guild.id), str(roles_url), 1))
-        sql_connection.execute(
-            "INSERT OR IGNORE INTO THREADS (GUILD_ID, WEBHOOK_URL, IS_ACTIVE) VALUES (?,?,?)",
-            (int(ctx.guild.id), str(threads_url), 1))
-        sql_connection.execute(
-            "INSERT OR IGNORE INTO MEMBERS (GUILD_ID, WEBHOOK_URL, IS_ACTIVE) VALUES (?,?,?)",
-            (int(ctx.guild.id), str(members_url), 1))
-        sql_connection.execute(
-            "INSERT OR IGNORE INTO GUILDS (GUILD_ID, WEBHOOK_URL, IS_ACTIVE) VALUES (?,?,?)",
-            (int(ctx.guild.id), str(guild_url), 1))
-
-        sql_connection.commit()
-        return sql_connection.close()
+    @app_commands.command(name="setup", description="Setup logging system")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def setup(self, interaction: discord.Interaction):
+        await interaction.response.send_modal(SetupModal())
 
 
 async def setup(bot):
-    await bot.add_cog(setupCog(bot))
+    await bot.add_cog(SetupCog(bot))
