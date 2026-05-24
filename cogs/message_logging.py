@@ -1,8 +1,6 @@
-import aiohttp  # Session for webhook
 import discord  # Discord API wrapper
 from discord.ext import commands  # Discord BOT
 import sqlite3 as sl
-from other import web_pfp_gen
 
 
 class MessageLoggingCog(commands.Cog):
@@ -46,12 +44,6 @@ class MessageLoggingCog(commands.Cog):
         # Id info
         embed.set_footer(text=f"Message Id: {before.id}")
 
-        # Webhook image
-        web_pfp = web_pfp_gen("thread", "red")
-        web_pfp = discord.File(web_pfp,
-                               filename=f"web_pfp.png")
-        # embed.set_thumbnail(url=f"attachment://skand_frog.png")
-
         # Send Webhook
         sql_connection = sl.connect('Raven.db')
         try:
@@ -63,10 +55,9 @@ class MessageLoggingCog(commands.Cog):
             return sql_connection.close()
         sql_connection.close()
 
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url(url=hook_url, session=session)
-            await webhook.send(embed=embed, username='Raven - Message edited',
-                               avatar_url=web_pfp)#self.bot.user.display_avatar.url)
+        webhook = discord.Webhook.from_url(url=hook_url, session=self.bot.session)
+        await webhook.send(embed=embed, username='Raven - Message edited',
+                           avatar_url=self.bot.user.display_avatar.url)
 
     @commands.Cog.listener('on_message_delete')
     async def msg_deleted(self, message: discord.message.Message):
@@ -108,10 +99,9 @@ class MessageLoggingCog(commands.Cog):
             return sql_connection.close()
         sql_connection.close()
 
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url(url=hook_url, session=session)
-            await webhook.send(embed=embed, username='Raven - Message deleted',
-                               avatar_url=self.bot.user.display_avatar.url)
+        webhook = discord.Webhook.from_url(url=hook_url, session=self.bot.session)
+        await webhook.send(embed=embed, username='Raven - Message deleted',
+                           avatar_url=self.bot.user.display_avatar.url)
 
     @commands.Cog.listener('on_bulk_message_delete')
     async def msg_bulk_deleted(self, messages):
@@ -136,10 +126,9 @@ class MessageLoggingCog(commands.Cog):
         if hook_url is None:
             return
 
-        async with aiohttp.ClientSession() as session:
-            webhook = discord.Webhook.from_url(url=hook_url, session=session)
-            await webhook.send(embed=embed, username='Raven - Purge',
-                               avatar_url=self.bot.user.display_avatar.url)
+        webhook = discord.Webhook.from_url(url=hook_url, session=self.bot.session)
+        await webhook.send(embed=embed, username='Raven - Purge',
+                           avatar_url=self.bot.user.display_avatar.url)
 
 
 async def setup(bot):

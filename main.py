@@ -2,7 +2,6 @@ import discord  # Discord API wrapper
 from discord import app_commands  # Slash commands
 from discord.ext import commands  # Discord BOT
 import aiohttp  # For direct API requests and webhooks
-import warnings  # For direct API requests and webhooks
 import logging
 
 from config import token, prefix, application_id, owners  # Global settings
@@ -12,6 +11,7 @@ from config import token, prefix, application_id, owners  # Global settings
 class RavenBot(commands.Bot):
     def __init__(self):
         # Logging
+        self.session = None
         logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                             level=logging.DEBUG,
                             filename='RavenBot.log',
@@ -32,8 +32,6 @@ class RavenBot(commands.Bot):
                          intents=intents,
                          application_id=application_id,
                          owner_ids=set(owners))
-        # Aiohttp
-        self.session = aiohttp.ClientSession()
 
         # Cogs
         self.initial_extensions = [
@@ -56,6 +54,7 @@ class RavenBot(commands.Bot):
             return await interaction.response.send_message("Unknown error. It was reported.", ephemeral=True)
 
     async def setup_hook(self):
+        self.session = aiohttp.ClientSession()
         # Cogs
         for ext in self.initial_extensions:
             await self.load_extension(ext)
@@ -69,7 +68,7 @@ class RavenBot(commands.Bot):
         logging.info('Logged on as {0.user}!'.format(bot))
 
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 bot = RavenBot()
 bot.remove_command('help')
 

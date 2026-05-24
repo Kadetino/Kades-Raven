@@ -1,7 +1,6 @@
 import aiohttp  # Session for webhook
 import discord  # Discord API wrapper
 from discord.ext import commands  # Discord BOT
-from PIL import Image  # Webhook icons
 import sqlite3 as sl
 
 
@@ -16,11 +15,6 @@ class MemberLoggingCog(commands.Cog):
                               colour=discord.Colour.green(),
                               description=f"<@{member.id}> has joined.")
         embed.set_author(name=member, icon_url=member.display_avatar.url)
-
-        # Webhook image
-        web_pfp = discord.File(f"gfx/skand_frog.png",
-                               filename=f"skand_frog.png")
-        embed.set_thumbnail(url=f"attachment://skand_frog.png")
 
         # Discord member since
         since = f"{member.created_at}"
